@@ -1,0 +1,91 @@
+Reference URLs:
+
+compute VM Image details : https://cloud.google.com/compute/docs/images/os-details#ubuntu_lts
+firewalls 				 : https://cloud.google.com/compute/docs/reference/rest/v1/firewalls
+
+
+URL to download the Finance data: https://www.bseindia.com/markets/equity/EQReports/StockPrcHistori.html?flag=0
+
+Deployment manager commands:
+-----------------------------
+
+gcloud deployment-manager deployments create gcp-bq-etl-deployment --config finance_project_deployment.yaml
+gcloud deployment-manager deployments delete gcp-bq-etl-deployment
+
+
+Nifi Instalation:
+------------------
+
+sudo su
+apt update
+apt install openjdk-8-jdk
+wget https://archive.apache.org/dist/nifi/1.16.0/nifi-1.16.0-bin.tar.gz
+
+tar -xzvf nifi-1.16.0-bin.tar.gz
+
+cd nifi-1.16.0/conf/
+and edit the nifi.properties..
+
+
+#### nifi.properties configuration ####
+---------------------------------------
+
+nifi.remote.input.http.enabled = false
+
+# web properties #
+nifi.web.http.host=
+nifi.web.http.port=8080
+
+nifi.web.https.host=
+nifi.web.https.port=
+
+# security properties #
+nifi.security.keystore=
+nifi.security.keystoreType=
+nifi.security.keystorePasswd=
+nifi.security.keyPasswd=
+nifi.security.truststore=
+nifi.security.truststoreType=
+nifi.security.truststorePasswd=
+
+#### To Start Nifi
+-------------------
+cd nifi-1.16.0/bin
+
+./nifi.sh start
+
+
+Insert_dt field in PutGcsBucket:
+--------------------------------
+insert_dt=${now():format("yyyy-MM-dd")}/${filename}
+
+
+
+Insert into command to insert the data to finance data:
+-------------------------------------------------------
+insert into [financial_dataset].[dbo].[equity_data_india] (Symbol,Date,Open_Price,High_Price,Low_Price,Close_Price,WAP,No_of_Shares,No_of_Trades,Total_Turnover,Deliverable_Quantity,Percentage_Deli_Qty_to_Traded_Qty,Spread_High_Low,Spread_Close_Open) values ('Adani Ports','1-March-2023','3085.05','3142.00','3085.05','3138.90','3114.270295954385012218','7366','1258','22939715.00','1708','23.19','56.95','53.85')
+
+
+Alter table command to add the auto_increment column:
+-----------------------------------------------------
+alter table new_financial_dataset add id_pk int not null identity(1,1);
+
+
+How to decide the bq-spark jar :
+---------------------------------
+
+https://github.com/tfayyaz/cloud-dataproc/blob/master/notebooks/python/1.2.%20BigQuery%20Storage%20%26%20Spark%20SQL%20-%20Python.ipynb
+
+
+creating dataproc cluster using workflow template:
+---------------------------------------------------
+https://cloud.google.com/dataproc/docs/samples/dataproc-instantiate-inline-workflow-template#dataproc_instantiate_inline_workflow_template-python
+
+https://github.com/GoogleCloudPlatform/python-docs-samples/blob/f735455f1faaf7a149c7d16f300bd02cace40302/dataproc/snippets/instantiate_inline_workflow_template.py
+
+
+URLs to get the required properties: (Dataproc workflow twmplates)
+-------------------------------------
+https://cloud.google.com/dataproc/docs/concepts/workflows/workflow-parameters#before
+https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.locations.workflowTemplates
+https://cloud.google.com/dataproc/docs/reference/rest/v1/PySparkJob
